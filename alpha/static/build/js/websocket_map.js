@@ -82,7 +82,7 @@ $(document).ready(function () {
             maxZoom: 18
         }));
 //make marker
-        makeMarker()
+        makeMarker();
         //Events
         google.maps.event.addListener(marker, 'click', function () {
             map.setCenter({lat: myLatitude, lng: myLongitude});
@@ -106,7 +106,7 @@ $(document).ready(function () {
     ws.onopen = function (evt) {
         $('#connexion_status').html('Connected');
 
-        initMap();
+       // initMap();
 
     };
     //on close a connexion
@@ -141,10 +141,10 @@ $(document).ready(function () {
         course.html(data.Course);
 
     };
-    setTimeout(function () {
-        map.setCenter({lat: myLatitude, lng: myLongitude});
-        makeMarker();
-        console.log({lat: myLatitude, lng: myLongitude});
-    }, 5000);
+//    setTimeout(function () {
+//        map.setCenter({lat: myLatitude, lng: myLongitude});
+//        makeMarker();
+//        console.log({lat: myLatitude, lng: myLongitude});
+//    }, 5000);
 
 });
