@@ -1,0 +1,18 @@
+{% extends 'layouts/template.html' %}
+{% block content %}
+	<h2>APP ({{ posts| length }} posts) </h2>
+	{% for p in posts%}
+		<article>
+            <h2><a href="/app/posts/{{p.id}}">{{p.id}}-{{p.title| upper}}</a></h2>
+		    <p>{{p.body| truncatewords:3}}</p>
+
+            <p><a href="#">Lire la suite ...</a></p>
+		</article>
+		{% if not forloop.last %}
+			<hr>
+		{% endif %}
+	{% empty %}
+	<p>Aucune donnee trouvee !</p>
+
+	{% endfor %}
+{% endblock %}

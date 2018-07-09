@@ -1,0 +1,17 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% include 'layouts/_nav.html' %}
+    <h2>Bonjour le monde</h2>
+    {% block content %}{% endblock%}
+    {% include 'layouts/_footer.html' %}
+</body>
+
+</html>
