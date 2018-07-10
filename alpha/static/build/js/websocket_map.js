@@ -78,31 +78,31 @@ $(document).ready(function () {
         //open
 
         map.mapTypes.set("OSM", new google.maps.ImageMapType({
-            getTileUrl: function (coord, zoom) {
-                // "Wrap" x (logitude) at 180th meridian properly
-                // NB: Don't touch coord.x because coord param is by reference, and changing its x property breakes something in Google's lib 
-                var tilesPerGlobe = 1 << zoom;
+        getTileUrl: function (coord, zoom) {
+        // "Wrap" x (logitude) at 180th meridian properly
+        // NB: Don't touch coord.x because coord param is by reference, and changing its x property breakes something in Google's lib 
+        var tilesPerGlobe = 1 << zoom;
                 var x = coord.x % tilesPerGlobe;
                 if (x < 0) {
-                    x = tilesPerGlobe + x;
-                }
-                // Wrap y (latitude) in a like manner if you want to enable vertical infinite scroll
+        x = tilesPerGlobe + x;
+        }
+        // Wrap y (latitude) in a like manner if you want to enable vertical infinite scroll
 
-                return "http://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png";
-            },
-            tileSize: new google.maps.Size(256, 256),
-            name: "OpenStreetMap",
-            maxZoom: 18
-        }));
+        return "http://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png";
+        },
+                tileSize: new google.maps.Size(256, 256),
+                name: "OpenStreetMap",
+        maxZoom: 18
+    }
+    ));
 //make marker
-        makeMarker();
-        //Events
+    makeMarker();
+    //Events
 
-        google.maps.event.addListener(marker, 'click', function () {
-            makeMarker();
+    google.maps.event.addListener(marker, 'click', function () {
+    makeMarker();
             console.log({lat: myLatitude, lng: myLongitude});
-
-        });
+    });
     }
     ;
 
@@ -119,12 +119,24 @@ $(document).ready(function () {
     ws.onopen = function (evt) {
         $('#connexion_status').html('Connected');
 
-
+        new PNotify({
+            title: 'Regular Success',
+            text: 'That thing that you were trying to do worked!',
+            type: 'success',
+            styling: 'bootstrap3'
+        });
 
     };
     //on close a connexion
     ws.onclose = function (evt) {
         $('#connexion_status').html('Disconnected');
+        new PNotify({
+            title: 'Perte de connection au serveur!',
+            text: 'Veuillez actualiser la page SVP.',
+            type: 'error',
+            styling: 'bootstrap3'
+        });
+        
     };
     //on receiving a message 
     ws.onmessage = function (evt) {
@@ -180,7 +192,7 @@ $(document).ready(function () {
             fillOpacity: 0.4
         });
         myCity.setMap(map);
-        
+
         console.log({lat: myLatitude, lng: myLongitude});
     }, 2000);
 
