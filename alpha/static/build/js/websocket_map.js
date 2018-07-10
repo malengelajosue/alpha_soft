@@ -8,20 +8,14 @@
 
 $(document).ready(function () {
     var map;
-    var lat, long, alt, tm, speed, sat, course;
+    var lat, long, alt, tm, speed, sat, course, marker, ws, infowindow;
     var myLongitude, myLatitude;
     myLatitude = -11.673898;
     myLongitude = 27.478447;
     myAltitude = '1325.8M';
     initialise = false;
-    function makeMarker() {
-
-        var marker = new google.maps.Marker({
-            position: {lat: myLatitude, lng: myLongitude},
-            map: map,
-            title: 'The drone location!',
-            animation: google.maps.Animation.BOUNCE,
-        });
+    marker = null;
+    function makeInfo() {
         var contentString = '<div id="content">' +
                 '<div id="siteNotice">' +
                 '</div>' +
@@ -34,10 +28,29 @@ $(document).ready(function () {
                 '</div>' +
                 '</div>';
         //info
-        var infowindow = new google.maps.InfoWindow({
+        infowindow = new google.maps.InfoWindow({
             content: contentString
         });
         infowindow.open(map, marker);
+    }
+    function makeMarker() {
+        if (marker === null) {
+            marker = new google.maps.Marker({
+                position: {lat: myLatitude, lng: myLongitude},
+                map: map,
+                title: 'The drone location!',
+                animation: google.maps.Animation.BOUNCE,
+            });
+            makeInfo();
+        } else {
+
+            marker.setMap(null);
+            marker = null;
+            infowindow.close();
+            makeMarker();
+        }
+
+
     }
     function initMap() {
         //enabling new cartography and theme
@@ -84,11 +97,11 @@ $(document).ready(function () {
 //make marker
         makeMarker();
         //Events
-        google.maps.event.addListener(marker, 'click', function () {
-            map.setCenter({lat: myLatitude, lng: myLongitude});
 
+        google.maps.event.addListener(marker, 'click', function () {
+            makeMarker();
             console.log({lat: myLatitude, lng: myLongitude});
-            console.log(myLongitude);
+
         });
     }
     ;
@@ -100,13 +113,13 @@ $(document).ready(function () {
 
 
 //url of websocket server
-    
+
     ws = new WebSocket("ws://localhost:8001/ws");
     //on open a connexion
     ws.onopen = function (evt) {
         $('#connexion_status').html('Connected');
 
-       // initMap();
+
 
     };
     //on close a connexion
@@ -141,10 +154,34 @@ $(document).ready(function () {
         course.html(data.Course);
 
     };
-//    setTimeout(function () {
-//        map.setCenter({lat: myLatitude, lng: myLongitude});
-//        makeMarker();
-//        console.log({lat: myLatitude, lng: myLongitude});
-//    }, 5000);
+
+// A la fermeture de la page
+    $(window).on('unload', function () {
+        ws.onclose = function () {};
+        ws.close();
+        console.log('close de connection');
+    });
+    setTimeout(function () {
+        initMap();
+        map.setCenter({lat: myLatitude, lng: myLongitude});
+
+        console.log({lat: myLatitude, lng: myLongitude});
+    }, 4000);
+    setInterval(function () {
+        map.setCenter({lat: myLatitude, lng: myLongitude});
+
+        var myCity = new google.maps.Circle({
+            center: {lat: myLatitude, lng: myLongitude},
+            radius: 0.1,
+            strokeColor: "#345e82",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: "#345e82",
+            fillOpacity: 0.4
+        });
+        myCity.setMap(map);
+        
+        console.log({lat: myLatitude, lng: myLongitude});
+    }, 2000);
 
 });

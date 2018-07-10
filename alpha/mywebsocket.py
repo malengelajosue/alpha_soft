@@ -60,6 +60,7 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
              t.start()
         except tornado.websocket.WebSocketClosedError:
             print('la connexion a ete fermee!')
+            self.close()
 
 
            # self.write_message(coordonnates)
@@ -73,8 +74,12 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
         self.write_message(message[::-1])
 
     def on_close(self):
-        print
-        'connection closed'
+        try:
+            print
+            'connection closed'
+        except tornado.websocket.WebSocketClosedError:
+            print('connection fermee de maniere inatendu!')
+            self.close()
 
     def check_origin(self, origin):
         return True
