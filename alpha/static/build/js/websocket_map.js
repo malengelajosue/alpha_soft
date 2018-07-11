@@ -7,6 +7,7 @@
 
 
 $(document).ready(function () {
+    $('.ui-pnotify').remove();
     var map;
     var lat, long, alt, tm, speed, sat, course, marker, ws, infowindow;
     var myLongitude, myLatitude;
@@ -114,7 +115,7 @@ $(document).ready(function () {
 
 //url of websocket server
 
-    ws = new WebSocket("ws://localhost:8001/ws");
+    ws = new ReconnectingWebSocket("ws://localhost:8001/ws");
     //on open a connexion
     ws.onopen = function (evt) {
         $('#connexion_status').html('Connected');
@@ -193,7 +194,29 @@ $(document).ready(function () {
         });
         myCity.setMap(map);
 
-        console.log({lat: myLatitude, lng: myLongitude});
+        //console.log({lat: myLatitude, lng: myLongitude});
     }, 2000);
-
+// Action on modal
+    var siteName, captureType, comment, btnCaptureModal,txtComment,cbxCaptureType,txtSiteName;
+    btnCaptureModal = $('#btnCaptureModal');
+    cbxCaptureType=$('#cbxCaptureType');
+    txtSiteName=$('#txtSiteName');
+    txtComment=$('#txtComment');
+    btnCaptureModal.on('click',function(){
+        siteName=txtSiteName.val();
+        captureType=cbxCaptureType.val();
+        comment=txtComment.val();
+        console.log(siteName,captureType,comment);
+        if (txtSiteName.val()===''   ) {
+            txtSiteName.css('borderColor','red');
+        }
+        else if(txtComment.val()===''){
+            txtComment.css('borderColor','red');
+        }
+        else{
+            message={'siteName':siteName,'captureType':captureType,'comment':comment};
+            ws.send('message');
+            console.log(message);
+        }
+    });
 });

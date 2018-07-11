@@ -67,7 +67,7 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
 
     def on_message(self, message):
         print
-        'message received:  %s' % message
+        ( message)
         # Reverse Message and send it back
         print
         'sending back message: %s' % message[::-1]

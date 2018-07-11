@@ -77,7 +77,10 @@ class Gpsaccess:
             print('Droit d\' au peripherique insufisant ou numero de port incorrecte!')
             print('reconnection ... to /dev/ttyUSB1 ')
             self.path='/dev/ttyUSB1'
-            self.usbPort = serial.Serial(self.path, self.baurate, timeout=self.timeout)
+            try:
+                self.usbPort = serial.Serial(self.path, self.baurate, timeout=self.timeout)
+            except SerialException:
+                print('Probleme de connection au module GPS')
         except FileNotFoundError:
             print('Impossible de trouver le fihcier '+self.path+' veuillez branchez le module GPS')
 

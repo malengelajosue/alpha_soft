@@ -5,34 +5,34 @@
     <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
         <span class="count_top"><i class="fa fa-clock-o"></i> Latitude</span>
         <div class="count" id="lat">123.50</div>
-        
+
     </div>
     <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
         <span class="count_top"><i class="fa fa-user"></i> Longitude</span>
         <div class="count green" id="long">12.3E</div>
-        
+
     </div>
     <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
         <span class="count_top"><i class="fa fa-user"></i> Altitude</span>
         <div class="count" id="alt" >1.32</div>
-        
+
     </div>
     <div class="col-md-1 col-sm-4 col-xs-6 tile_stats_count">
         <span class="count_top"><i class="fa fa-user"></i> Vitesse</span>
         <div class="count" id="speed" >1.32</div>
-        
+
     </div>
     <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
         <span class="count_top"><i class="fa fa-user"></i> Course</span>
         <div class="count" id="course" >1.32</div>
-        
+
     </div>
     <div class="col-md-1 col-sm-4 col-xs-6 tile_stats_count">
         <span class="count_top"><i class="fa fa-user"></i> stallites</span>
         <div class="count" id="sat" >1.32</div>
-        
+
     </div>
- 
+
 
 </div>
 <div class='row'>
@@ -45,7 +45,7 @@
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                        
+
                     </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a>
                     </li>
@@ -84,7 +84,7 @@
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
-                        
+
                     </li>
                     <li><a class="close-link"><i class="fa fa-close"></i></a>
                     </li>
@@ -92,8 +92,8 @@
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                 
-                   <div id="map"  style="height: 300px; position: relative; overflow: hidden;">
+
+                <div id="map"  style="height: 300px; position: relative; overflow: hidden;">
                 </div>
                 <div class="ln_solid"></div>
                 <div class="form-group">
@@ -118,32 +118,34 @@
                 <div class="modal-body">
                     <form class="form-horizontal">
                         <label for="site_name">Nom du site:</label>
-                        <input  type='text' class='form-control' name='site_name'/>
+                        <div>
+                            <input  id='txtSiteName' type='text' class='form-control' name='site_name'/>
+                        </div>
                         <label for="data_type">Type de prelevement:</label>
-                        <select name='data_type' class='form-control'>
-                            <option value='1'>Ponctuel</option>
-                            <option value='2'>Lineaire</option>
-                            <option value='3'>Polygonal</option>
-                        </select>
+                        <div  >
+                            <select id='cbxCaptureType' name='data_type' class="form-control">
+                                <option value='1'>Ponctuel</option>
+                                <option value='2'>Lineaire</option>
+                                <option value='3'>Polygonal</option>
+                            </select>
+                        </div>
                         <div>
                             <label for="comment">Commentaire:</label>
-                        <textarea class="form-conmtrol" name="comment" rows="3">
-                            
-                        </textarea>
+                            <textarea id="txtComment" required="required" class="form-control" name="comment" ></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-success">Valider</button>
+                    <button type="button" class="btn btn-success" id='btnCaptureModal'>Commencer la capture</button>
                 </div>
 
             </div>
         </div>
     </div>
     <!-- /modals -->
-    
-    
+
+
 </div>
 
 
