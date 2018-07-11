@@ -121,7 +121,7 @@ $(document).ready(function () {
 
         new PNotify({
             title: 'Regular Success',
-            text: 'That thing that you were trying to do worked!',
+            text: 'Connection etablie avec succes!',
             type: 'success',
             styling: 'bootstrap3'
         });
