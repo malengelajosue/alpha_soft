@@ -10,6 +10,7 @@ from app.models import Post
 from random import randint
 from datetime import datetime
 import time
+import ast
 
 from myclasses.gpsaccess import Gpsaccess as Gps
 
@@ -22,7 +23,6 @@ from myclasses.gpsaccess import Gpsaccess as Gps
 # # ... wait for connection to open
 # ws.send('hello world')
 
-post=posts=Post.objects.all()
 
 class MyAppWebSocket(tornado.websocket.WebSocketHandler):
     # Simple Websocket echo handler. This could be extended to
@@ -32,13 +32,13 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
         cls.connected=False
         if cls.connected==False:
             cls.gpsDevice = Gps()
+            cls.myCoord=''
             cls.connected=True
 
 
         while (True):
             coordonnates = cls.gpsDevice.readCoordonates()
-
-
+            cls.myCoord=coordonnates
             if  coordonnates!={}:
 
                 lat = float(coordonnates['latitude'])
@@ -54,10 +54,10 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
 
     def open(self):
         try:
-             print
-             ('new connection')
-             t=threading.Thread(target=self.sendCordonnates())
-             t.start()
+            print
+            ('new connection')
+            t=threading.Thread(target=self.sendCordonnates())
+            t.start()
         except tornado.websocket.WebSocketClosedError:
             print('la connexion a ete fermee!')
             self.close()
@@ -66,12 +66,9 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
            # self.write_message(coordonnates)
 
     def on_message(self, message):
-        print
-        ( message)
-        # Reverse Message and send it back
-        print
-        'sending back message: %s' % message[::-1]
-        self.write_message(message[::-1])
+        message=ast.literal_eval(str(message))
+
+        self.write_message({'Message':message.get('action')})
 
     def on_close(self):
         try:
@@ -85,7 +82,8 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
 
-
+    def persisteCoordonates(self):
+        pass
 
 application = tornado.web.Application([
     (r'/ws', MyAppWebSocket),

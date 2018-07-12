@@ -142,8 +142,9 @@ $(document).ready(function () {
     //on receiving a message 
     ws.onmessage = function (evt) {
         var data = evt.data;
+         console.log('message recu: '+data);
         data = JSON.parse(data);
-
+       
         myLongitude = parseFloat(data.Long);
 
 
@@ -213,9 +214,11 @@ $(document).ready(function () {
         else if(txtComment.val()===''){
             txtComment.css('borderColor','red');
         }
+        //CC capture cordunate
         else{
-            message={'siteName':siteName,'captureType':captureType,'comment':comment};
-            ws.send('message');
+            message={'action':'CC','siteName':siteName,'captureType':captureType,'comment':comment};
+            message=JSON.stringify(message);
+            ws.send(message);
             console.log(message);
         }
     });
