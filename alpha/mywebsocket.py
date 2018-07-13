@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import signal
+import sys
 import threading
 
 import tornado.ioloop
@@ -29,17 +31,17 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
     # Simple Websocket echo handler. This could be extended to
     # use Redis PubSub to broadcast updates to clients.
 
-    def sendCordonnates(cls):
-        cls.connected=False
-        if cls.connected==False:
-            cls.gpsDevice = Gps()
-            cls.myCoord=''
-            cls.connected=True
+    def sendCordonnates(self):
+        self.connected=False
+        if self.connected==False:
+            self.gpsDevice = Gps()
+            self.myCoord=''
+            self.connected=True
 
 
         while (True):
-            coordonnates = cls.gpsDevice.readCoordonates()
-            cls.myCoord=coordonnates
+            coordonnates = self.gpsDevice.readCoordonates()
+            self.myCoord=coordonnates
             if  coordonnates!={}:
 
                 lat = float(coordonnates['latitude'])
@@ -50,29 +52,52 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
                 satellite = coordonnates['satellite']
                 moment = datetime.now().strftime('%H:%M:%S')
                 coordonnates = {'Lat': lat, 'Long': long, 'Alt': alt, 'Moment': moment,'Sat':satellite,'Course':course,'Speed':speed}
-                cls.write_message(coordonnates)
+                self.write_message(coordonnates)
                 time.sleep(0.5)
+    def getPosition(self):
+        self.connected = False
+        if self.connected == False:
+            self.gpsDevice = Gps()
+            self.myCoord = ''
+            self.connected = True
+
+        coordonnates = self.gpsDevice.readCoordonates()
+        self.myCoord = coordonnates
+        if coordonnates != {}:
+            self.lat = float(coordonnates['latitude'])
+            self.long = float(coordonnates['longitude'])
+            self.alt = coordonnates['altitude']
+            speed = coordonnates['speed']
+            course = coordonnates['course']
+            satellite = coordonnates['satellite']
+            self.moment = datetime.now().strftime('%H:%M:%S')
+            coordonnates = {'Lat': self.lat, 'Long': self.long, 'Alt': self.alt, 'Moment': self.moment, 'Sat': satellite,'Course': course, 'Speed': speed}
+            self.write_message(coordonnates)
+            return coordonnates
+
+
 
     def open(self):
-        t=''
-        try:
-         print
-         ('new connection')
-         t=threading.Thread(target=self.sendCordonnates())
-         t.start()
-        except StreamClosedError:
-            print("connection fermee a l\'ouverture")
-        except tornado.websocket.WebSocketClosedError:
-            t.
-            print("fermeture inattendu de la connection!")
-
-
-           # self.write_message(coordonnates)
+        self.persit=False
 
     def on_message(self, message):
-        message=ast.literal_eval(str(message))
-        print("message "+message)
-        self.write_message({'Message':message})
+
+        message=ast.literal_eval(message)
+        print(message)
+        coordonates={}
+
+        if message.get('action')=='get_position':
+            coordonates=self.getPosition()
+            print(message.get('action'))
+        elif message.get('action')=='start_persiste':
+            print("start persisting....")
+            self.persisteCoordonates()
+        elif message.get('action')=='stop_persiste':
+           self.persit=False
+
+    def run(self):
+        time.sleep(1)
+        return
 
     def on_close(self):
         try:
@@ -87,7 +112,9 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
 
 
     def persisteCoordonates(self):
-        pass
+        self.getPosition()
+        print("enregistrement"+self.moment)
+
 
 application = tornado.web.Application([
     (r'/ws', MyAppWebSocket),
@@ -98,13 +125,19 @@ application = tornado.web.Application([
 
 if __name__ == '__main__':
 
-    try:
-        application.listen(8001)
-        tornado.ioloop.IOLoop.instance().start()
-    except tornado.websocket.WebSocketClosedError:
-        print("probleme de connections")
-        tornado.ioloop.IOLoop.instance().close()
-        time.sleep(2)
-        tornado.ioloop.IOLoop.instance().start()
-        tornado.ioloop.IOLoop.instance().clear_instance()
-        tornado.ioloop.IOLoop.instance().clear_current()
+
+    application.listen(8001)
+    instance=tornado.ioloop.IOLoop.instance()
+    instance.start()
+
+
+
+
+    def signal_handler(signal, frame):
+        print('You pressed Ctrl+C!')
+        instance.stop()
+        sys.exit(0)
+
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.pause()

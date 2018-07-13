@@ -10,6 +10,7 @@ $(document).ready(function () {
     $('.ui-pnotify').remove();
     var map;
     var lat, long, alt, tm, speed, sat, course, marker, ws, infowindow;
+    var siteName, captureType, comment, btnCaptureModal, txtComment, cbxCaptureType, txtSiteName, btnStopCaptureModal, persitInterval;
     var myLongitude, myLatitude;
     myLatitude = -11.673898;
     myLongitude = 27.478447;
@@ -79,35 +80,37 @@ $(document).ready(function () {
         //open
 
         map.mapTypes.set("OSM", new google.maps.ImageMapType({
-        getTileUrl: function (coord, zoom) {
-        // "Wrap" x (logitude) at 180th meridian properly
-        // NB: Don't touch coord.x because coord param is by reference, and changing its x property breakes something in Google's lib 
-        var tilesPerGlobe = 1 << zoom;
+            getTileUrl: function (coord, zoom) {
+                // "Wrap" x (logitude) at 180th meridian properly
+                // NB: Don't touch coord.x because coord param is by reference, and changing its x property breakes something in Google's lib 
+                var tilesPerGlobe = 1 << zoom;
                 var x = coord.x % tilesPerGlobe;
                 if (x < 0) {
-        x = tilesPerGlobe + x;
+                    x = tilesPerGlobe + x;
+                }
+                // Wrap y (latitude) in a like manner if you want to enable vertical infinite scroll
+
+                return "http://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png";
+            },
+            tileSize: new google.maps.Size(256, 256),
+            name: "OpenStreetMap",
+            maxZoom: 18
         }
-        // Wrap y (latitude) in a like manner if you want to enable vertical infinite scroll
-
-        return "http://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png";
-        },
-                tileSize: new google.maps.Size(256, 256),
-                name: "OpenStreetMap",
-        maxZoom: 18
-    }
-    ));
+        ));
 //make marker
-    makeMarker();
-    //Events
+        makeMarker();
+        //Events
 
-    google.maps.event.addListener(marker, 'click', function () {
-    makeMarker();
+        google.maps.event.addListener(marker, 'click', function () {
+            makeMarker();
             console.log({lat: myLatitude, lng: myLongitude});
-    });
+        });
     }
     ;
 
 
+
+//mes fonctions
 
 
 
@@ -137,15 +140,15 @@ $(document).ready(function () {
             type: 'error',
             styling: 'bootstrap3'
         });
-        
+
     };
     //on receiving a message 
     ws.onmessage = function (evt) {
         var data = evt.data;
-        
-         console.log('message recu: '+data);
+
+        console.log('message recu: ' + data);
         data = JSON.parse(data);
-       
+
         myLongitude = parseFloat(data.Long);
 
 
@@ -169,54 +172,123 @@ $(document).ready(function () {
         course.html(data.Course);
 
     };
+    //fonctions
+    function persisteCoordonates(message){
+       
+    }
+    function stopPersist(){
+    
+}
+function getPosition(){}
+
+    //recuperation des coordonnees a chaque seconde
+    var intervalGetPosition =setInterval(function () {
+            
+            if (ws.readyState === 1) {
+                msg = {'action': 'get_position'};
+                
+                msg = JSON.stringify(msg);
+                ws.send(msg);
+                map.setCenter({lat: myLatitude, lng: myLongitude});
+
+                var myCity = new google.maps.Circle({
+                    center: {lat: myLatitude, lng: myLongitude},
+                    radius: 0.1,
+                    strokeColor: "#345e82",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#345e82",
+                    fillOpacity: 0.4
+                });
+                myCity.setMap(map);
+                
+               
+            }
+        }, 1500);
+        
+     
+
+
 
 // A la fermeture de la page
-$( window ).on('beforeunload',function() {
-  return "Bye now!";
-});
+    $(window).on('beforeunload', function () {
+        return "Bye now!";
+    });
 //
-// remettre au centre de la carte a l'initialisatiion de la carte
+ //remettre au centre de la carte a l'initialisatiion de la carte
     setTimeout(function () {
         initMap();
         map.setCenter({lat: myLatitude, lng: myLongitude});
 
         console.log({lat: myLatitude, lng: myLongitude});
-    }, 4000);
-  //remettre la carte au centre en fonction des coordonnees apres chaque 2 secondes
-    setInterval(function () {
-        map.setCenter({lat: myLatitude, lng: myLongitude});
+    }, 1000);
+    //remettre la carte au centre en fonction des coordonnees apres chaque 2 secondes
 
-        var myCity = new google.maps.Circle({
-            center: {lat: myLatitude, lng: myLongitude},
-            radius: 0.1,
-            strokeColor: "#345e82",
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: "#345e82",
-            fillOpacity: 0.4
-        });
-        myCity.setMap(map);
-
-        //console.log({lat: myLatitude, lng: myLongitude});
-    }, 2000);
 // Action on modal
-    var siteName, captureType, comment, btnCaptureModal,txtComment,cbxCaptureType,txtSiteName;
+    var message;
     btnCaptureModal = $('#btnCaptureModal');
-    cbxCaptureType=$('#cbxCaptureType');
-    txtSiteName=$('#txtSiteName');
-    txtComment=$('#txtComment');
-    btnCaptureModal.on('click',function(){
-        siteName=txtSiteName.val();
-        captureType=cbxCaptureType.val();
-        comment=txtComment.val();
+    btnStopCaptureModal = $('#btnStopCaptureModal');
+    cbxCaptureType = $('#cbxCaptureType');
+    txtSiteName = $('#txtSiteName');
+    txtComment = $('#txtComment');
+    btnCaptureModal.on('click', function () {
+        siteName = txtSiteName.val();
+        captureType = cbxCaptureType.val();
+        comment = txtComment.val();
         //console.log(siteName,captureType,comment);
-       
-            message={'action':'CC','siteName':siteName,'captureType':captureType,'comment':comment};
-            ws.send(message);
-            message=JSON.stringify(message);
-          
-            console.log("message envoye");
-           
+        clearInterval(intervalGetPosition);
         
+         new PNotify({
+            title: 'Enregistrement des donnees en cours!',
+            text: 'Debut de l\'enregistrement des donnees!',
+            type: 'info',
+            styling: 'bootstrap3'
+        });
+        $('#modal').modal('toggle');
+        console.log(message);
+        
+         persitInterval=setInterval(function(){
+            message = {'action': 'start_persiste', 'siteName': siteName, 'captureType': captureType, 'comment': comment};
+            message = JSON.stringify(message);
+            console.log(message);
+            ws.send(message);
+        },1200);
+
+
+
+    });
+    //stop capture
+    btnStopCaptureModal.on('click', function () {
+           clearInterval(persitInterval);
+             new PNotify({
+            title: 'Enregistrement',
+            text: 'fin de l\'enregistrement des donnees.',
+            type: 'info',
+            styling: 'bootstrap3'
+        });
+           intervalGetPosition =setInterval(function () {
+           
+            if (ws.readyState === 1) {
+                msg = {'action': 'get_position'};
+                
+                msg = JSON.stringify(msg);
+                ws.send(msg);
+                map.setCenter({lat: myLatitude, lng: myLongitude});
+
+                var myCity = new google.maps.Circle({
+                    center: {lat: myLatitude, lng: myLongitude},
+                    radius: 0.1,
+                    strokeColor: "#345e82",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#345e82",
+                    fillOpacity: 0.4
+                });
+                myCity.setMap(map);
+                
+               
+            }
+        }, 1500);
+
     });
 });
