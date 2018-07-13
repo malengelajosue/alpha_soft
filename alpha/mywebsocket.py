@@ -5,6 +5,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 import tornado.wsgi
+from tornado.iostream import StreamClosedError
 from alpha.wsgi import application as myapp_wsgi
 from app.models import Post
 from random import randint
@@ -53,22 +54,25 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
                 time.sleep(0.5)
 
     def open(self):
+        t=''
         try:
-            print
-            ('new connection')
-            t=threading.Thread(target=self.sendCordonnates())
-            t.start()
+         print
+         ('new connection')
+         t=threading.Thread(target=self.sendCordonnates())
+         t.start()
+        except StreamClosedError:
+            print("connection fermee a l\'ouverture")
         except tornado.websocket.WebSocketClosedError:
-            print('la connexion a ete fermee!')
-            self.close()
+            t.
+            print("fermeture inattendu de la connection!")
 
 
            # self.write_message(coordonnates)
 
     def on_message(self, message):
         message=ast.literal_eval(str(message))
-
-        self.write_message({'Message':message.get('action')})
+        print("message "+message)
+        self.write_message({'Message':message})
 
     def on_close(self):
         try:
@@ -93,5 +97,14 @@ application = tornado.web.Application([
 ], debug=True)
 
 if __name__ == '__main__':
-    application.listen(8001)
-    tornado.ioloop.IOLoop.instance().start()
+
+    try:
+        application.listen(8001)
+        tornado.ioloop.IOLoop.instance().start()
+    except tornado.websocket.WebSocketClosedError:
+        print("probleme de connections")
+        tornado.ioloop.IOLoop.instance().close()
+        time.sleep(2)
+        tornado.ioloop.IOLoop.instance().start()
+        tornado.ioloop.IOLoop.instance().clear_instance()
+        tornado.ioloop.IOLoop.instance().clear_current()

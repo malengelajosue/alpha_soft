@@ -142,6 +142,7 @@ $(document).ready(function () {
     //on receiving a message 
     ws.onmessage = function (evt) {
         var data = evt.data;
+        
          console.log('message recu: '+data);
         data = JSON.parse(data);
        
@@ -170,17 +171,18 @@ $(document).ready(function () {
     };
 
 // A la fermeture de la page
-    $(window).on('unload', function () {
-        ws.onclose = function () {};
-        ws.close();
-        console.log('close de connection');
-    });
+$( window ).on('beforeunload',function() {
+  return "Bye now!";
+});
+//
+// remettre au centre de la carte a l'initialisatiion de la carte
     setTimeout(function () {
         initMap();
         map.setCenter({lat: myLatitude, lng: myLongitude});
 
         console.log({lat: myLatitude, lng: myLongitude});
     }, 4000);
+  //remettre la carte au centre en fonction des coordonnees apres chaque 2 secondes
     setInterval(function () {
         map.setCenter({lat: myLatitude, lng: myLongitude});
 
@@ -207,19 +209,14 @@ $(document).ready(function () {
         siteName=txtSiteName.val();
         captureType=cbxCaptureType.val();
         comment=txtComment.val();
-        console.log(siteName,captureType,comment);
-        if (txtSiteName.val()===''   ) {
-            txtSiteName.css('borderColor','red');
-        }
-        else if(txtComment.val()===''){
-            txtComment.css('borderColor','red');
-        }
-        //CC capture cordunate
-        else{
+        //console.log(siteName,captureType,comment);
+       
             message={'action':'CC','siteName':siteName,'captureType':captureType,'comment':comment};
-            message=JSON.stringify(message);
             ws.send(message);
-            console.log(message);
-        }
+            message=JSON.stringify(message);
+          
+            console.log("message envoye");
+           
+        
     });
 });
