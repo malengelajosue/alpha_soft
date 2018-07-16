@@ -20,7 +20,8 @@ from . import views
 handler404='alpha.views.error404'
 
 urlpatterns = [
-    url(r'^$', views.home,name='home'),
+
+    url(r'^$', include('app.urls'),name='home'),
     url(r'^app/', include('app.urls'),name='app'),
     url(r'^admin/', admin.site.urls,name='admin'),
 ]

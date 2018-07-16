@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Post
+from .models import Post, Site, Coordonates
 def index(request):
 
     posts=Post.objects.all()
@@ -11,5 +11,12 @@ def show(request,id):
     return render(request, 'app/show.html', {'posts':posts })
 def map(request):
     return render(request, 'app/map.html',)
-def data(request):
+def data(request,id):
+    coordonates=Coordonates.objects.get(site_number=id)
     return render(request,'app/data.html')
+def timeline(request):
+    sites= Site.objects.all()
+    return render(request,'app/timeline.html',{'sites':sites})
+def timeline_details(request,id):
+    sites= Site.objects.get(site_number=id)
+    return render(request,'app/timeline_details.html',{'sites':sites})
