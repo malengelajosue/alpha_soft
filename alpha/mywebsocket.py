@@ -95,10 +95,19 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
 
         if message.get('action')=='get_position':
             coordonates=self.getPosition()
-            print(message.get('action'))
         elif message.get('action')=='start_persiste':
             print("start persisting....")
-            self.persisteInformations(message.get('site_name'),message.get('type'),message.get('description'))
+            self.site_name=str(message.get('site_name'))
+            self.capture_type=str(message.get('type'))
+            self.description=str(message.get('description'))
+            self.site_number = str(int(time.time())) + str(random.randrange(1, 99))
+            _name=self.site_name
+            _description=self.description
+            _type=self.capture_type
+            _site_number=self.site_number
+            monSite=Site(name=_name,description=_description,site_number=_site_number,type=_type)
+            monSite.save()
+            self.persit = True
         elif message.get('action')=='stop_persiste':
            self.persit=False
 
@@ -118,15 +127,17 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
 
-    def persisteInformations(self,site_name,capture_type,description):
-        self.site_name=site_name
-        self.capture_type=capture_type
-        self.description=description
-        self.site_number=str(int(time.time())) + str(random.randrange(1,99))
-        self.persit=True
     def saveCoordonates(self):
-        #coord=Coordonates(lat=self.lat,long=self.long,alt=self.alt,moment=self.moment,vitesse=self.speed,course=self.course,satelite=self.satellite,site_number=self.site_number)
-        coord=Coordonates()
+        _lat=str(self.lat)
+        _long=str(self.long)
+        _alt=str(self.alt)
+        _moment=str(self.moment)
+        _vitesse=str(self.speed)
+        _course=str(self.course)
+        _satellite=str(self.satellite)
+        _site_number=str(self.site_number)
+        coord=Coordonates(lat=_lat,long=_long,alt=_alt,moment=_moment,vitesse=_vitesse,course=_course,satellite=_satellite,site_number=_site_number)
+
         coord.save()
 
 

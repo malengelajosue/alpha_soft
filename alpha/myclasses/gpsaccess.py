@@ -4,7 +4,7 @@ import  time
 from serial.serialutil import SerialException
 class Gpsaccess:
     def __init__(self):
-        self.path='/dev/ttyUSB0'
+        self.path='/dev/ttyUSB1'
         self.baurate=4800
         self.timeout=1
         self.readSpeed=1200
@@ -77,6 +77,7 @@ class Gpsaccess:
             print('Droit d\' au peripherique insufisant ou numero de port incorrecte!')
             print('reconnection ... to /dev/ttyUSB1 ')
             self.path='/dev/ttyUSB1'
+            self.usbPort = serial.Serial(self.path, self.baurate, timeout=self.timeout)
             try:
                 self.usbPort = serial.Serial(self.path, self.baurate, timeout=self.timeout)
             except SerialException:

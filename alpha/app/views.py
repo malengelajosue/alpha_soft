@@ -1,4 +1,7 @@
+from django.db.models.functions import Lower
 from django.shortcuts import render
+from django.template.defaultfilters import lower
+
 from .models import Post, Site, Coordonates
 def index(request):
 
@@ -15,7 +18,7 @@ def data(request,id):
     coordonates=Coordonates.objects.filter(site_number=id)
     return render(request,'app/data.html',{'coordonates':coordonates})
 def timeline(request):
-    sites= Site.objects.all()
+    sites= Site.objects.all().order_by(Lower('id').desc())
     return render(request,'app/timeline.html',{'sites':sites})
 def timeline_details(request,id):
     sites= Site.objects.get(site_number=id)

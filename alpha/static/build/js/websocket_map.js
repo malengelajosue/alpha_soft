@@ -10,8 +10,10 @@ $(document).ready(function () {
     $('.ui-pnotify').remove();
     var map;
     var lat, long, alt, tm, speed, sat, course, marker, ws, infowindow;
-    var siteName, captureType, comment, btnCaptureModal, txtComment, cbxCaptureType, txtSiteName, btnStopCaptureModal, persitInterval;
+    var siteName, captureType, comment, btnCaptureModal, txtComment, cbxCaptureType, txtSiteName, btnStopCaptureModal, persitInterval, btnLaunchModal;
     var myLongitude, myLatitude;
+    //Enregisrement
+    var messageToSendPersist, persistNow = false, stopPersistNow = false;
     myLatitude = -11.673898;
     myLongitude = 27.478447;
     myAltitude = '1325.8M';
@@ -108,14 +110,6 @@ $(document).ready(function () {
     }
     ;
 
-
-
-//mes fonctions
-
-
-
-
-
 //url of websocket server
 
     ws = new ReconnectingWebSocket("ws://localhost:8001/ws");
@@ -145,17 +139,10 @@ $(document).ready(function () {
     //on receiving a message 
     ws.onmessage = function (evt) {
         var data = evt.data;
-
         console.log('message recu: ' + data);
         data = JSON.parse(data);
-
         myLongitude = parseFloat(data.Long);
-
-
-
         myLatitude = parseFloat(data.Lat);
-
-
         lat = $('#lat');
         long = $('#long');
         alt = $('#alt');
@@ -173,13 +160,7 @@ $(document).ready(function () {
 
     };
     //fonctions
-    function persisteCoordonates(message) {
 
-    }
-    function stopPersist() {
-
-    }
-    function getPosition() {}
 
     //recuperation des coordonnees a chaque seconde
     var intervalGetPosition = setInterval(function () {
@@ -188,7 +169,30 @@ $(document).ready(function () {
             msg = {'action': 'get_position'};
 
             msg = JSON.stringify(msg);
-            ws.send(msg);
+            if (persistNow) {
+                ws.send(messageToSendPersist);
+                new PNotify({
+                    title: 'Debut de l\'enregistrement',
+                    text: 'Fin de l\'enregistrement des donnees.',
+                    type: 'info',
+                    styling: 'bootstrap3'
+                });
+                persistNow = false;
+            } else if (stopPersistNow) {
+                msgToStop = {'action': 'stop_persiste'};
+                msgToStop = JSON.stringify(msgToStop);
+                ws.send(msgToStop);
+                new PNotify({
+                    title: 'Fin de l\'enregistrement',
+                    text: 'Fin de l\'enregistrement des donnees.',
+                    type: 'default',
+                    styling: 'bootstrap3'
+                });
+                stopPersistNow = false;
+            } else {
+                ws.send(msg);
+            }
+
             map.setCenter({lat: myLatitude, lng: myLongitude});
 
             var myCity = new google.maps.Circle({
@@ -205,10 +209,6 @@ $(document).ready(function () {
 
         }
     }, 1500);
-
-
-
-
 
 // A la fermeture de la page
     $(window).on('beforeunload', function () {
@@ -227,7 +227,9 @@ $(document).ready(function () {
 // Action on modal
     var message;
     btnCaptureModal = $('#btnCaptureModal');
+    btnLaunchModal = $('#btnLaunchModal');
     btnStopCaptureModal = $('#btnStopCaptureModal');
+    btnStopCaptureModal.hide();
     cbxCaptureType = $('#cbxCaptureType');
     txtSiteName = $('#txtSiteName');
     txtComment = $('#txtComment');
@@ -238,56 +240,27 @@ $(document).ready(function () {
         //console.log(siteName,captureType,comment);
         // clearInterval(intervalGetPosition);
 
-        new PNotify({
-            title: 'Enregistrement des donnees en cours!',
-            text: 'Debut de l\'enregistrement des donnees!',
-            type: 'info',
-            styling: 'bootstrap3'
-        });
         $('#modal').modal('toggle');
-        console.log(message);
-        
-        message = {'action': 'start_persiste', 'site_name': siteName, 'type': captureType, 'description': comment};
-        message = JSON.stringify(message);
-        console.log(message);
-        ws.send(message);
 
 
+        messageToSendPersist = {'action': 'start_persiste', 'site_name': siteName, 'type': captureType, 'description': comment};
+        messageToSendPersist = JSON.stringify(messageToSendPersist);
+        btnLaunchModal.hide();
+        btnStopCaptureModal.show();
+        persistNow = true;
+        console.log(messageToSendPersist);
 
 
     });
     //stop capture
     btnStopCaptureModal.on('click', function () {
-        clearInterval(persitInterval);
-        new PNotify({
-            title: 'Enregistrement',
-            text: 'fin de l\'enregistrement des donnees.',
-            type: 'info',
-            styling: 'bootstrap3'
-        });
-        intervalGetPosition = setInterval(function () {
+        // clearInterval(persitInterval);
 
-            if (ws.readyState === 1) {
-                msg = {'action': 'get_position'};
+        stopPersistNow = true;
 
-                msg = JSON.stringify(msg);
-                ws.send(msg);
-                map.setCenter({lat: myLatitude, lng: myLongitude});
+        $(this).hide();
+        btnLaunchModal.show();
 
-                var myCity = new google.maps.Circle({
-                    center: {lat: myLatitude, lng: myLongitude},
-                    radius: 0.1,
-                    strokeColor: "#345e82",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#345e82",
-                    fillOpacity: 0.4
-                });
-                myCity.setMap(map);
-
-
-            }
-        }, 1500);
 
     });
 });
