@@ -9,11 +9,14 @@ import tornado.websocket
 import tornado.wsgi
 from tornado.iostream import StreamClosedError
 from alpha.wsgi import application as myapp_wsgi
-from app.models import Post
+from app.models import Coordonates,Site
 from random import randint
 from datetime import datetime
 import time
 import ast
+import random
+
+
 
 from myclasses.gpsaccess import Gpsaccess as Gps
 
@@ -37,6 +40,7 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
             self.gpsDevice = Gps()
             self.myCoord=''
             self.connected=True
+            self.persit=False
 
 
         while (True):
@@ -67,12 +71,15 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
             self.lat = float(coordonnates['latitude'])
             self.long = float(coordonnates['longitude'])
             self.alt = coordonnates['altitude']
-            speed = coordonnates['speed']
-            course = coordonnates['course']
-            satellite = coordonnates['satellite']
+            self.speed = coordonnates['speed']
+            self.course = coordonnates['course']
+            self.satellite = coordonnates['satellite']
             self.moment = datetime.now().strftime('%H:%M:%S')
-            coordonnates = {'Lat': self.lat, 'Long': self.long, 'Alt': self.alt, 'Moment': self.moment, 'Sat': satellite,'Course': course, 'Speed': speed}
+            coordonnates = {'Lat': self.lat, 'Long': self.long, 'Alt': self.alt, 'Moment': self.moment, 'Sat': self.satellite,'Course': self.course, 'Speed': self.speed}
             self.write_message(coordonnates)
+            if self.persit==True:
+                self.saveCoordonates()
+
             return coordonnates
 
 
@@ -91,7 +98,7 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
             print(message.get('action'))
         elif message.get('action')=='start_persiste':
             print("start persisting....")
-            self.persisteCoordonates()
+            self.persisteInformations(message.get('site_name'),message.get('type'),message.get('description'))
         elif message.get('action')=='stop_persiste':
            self.persit=False
 
@@ -111,9 +118,18 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
         return True
 
 
-    def persisteCoordonates(self):
-        self.getPosition()
-        print("enregistrement"+self.moment)
+    def persisteInformations(self,site_name,capture_type,description):
+        self.site_name=site_name
+        self.capture_type=capture_type
+        self.description=description
+        self.site_number=str(int(time.time())) + str(random.randrange(1,99))
+        self.persit=True
+    def saveCoordonates(self):
+        #coord=Coordonates(lat=self.lat,long=self.long,alt=self.alt,moment=self.moment,vitesse=self.speed,course=self.course,satelite=self.satellite,site_number=self.site_number)
+        coord=Coordonates()
+        coord.save()
+
+
 
 
 application = tornado.web.Application([

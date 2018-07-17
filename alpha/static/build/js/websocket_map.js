@@ -173,40 +173,40 @@ $(document).ready(function () {
 
     };
     //fonctions
-    function persisteCoordonates(message){
-       
+    function persisteCoordonates(message) {
+
     }
-    function stopPersist(){
-    
-}
-function getPosition(){}
+    function stopPersist() {
+
+    }
+    function getPosition() {}
 
     //recuperation des coordonnees a chaque seconde
-    var intervalGetPosition =setInterval(function () {
-            
-            if (ws.readyState === 1) {
-                msg = {'action': 'get_position'};
-                
-                msg = JSON.stringify(msg);
-                ws.send(msg);
-                map.setCenter({lat: myLatitude, lng: myLongitude});
+    var intervalGetPosition = setInterval(function () {
 
-                var myCity = new google.maps.Circle({
-                    center: {lat: myLatitude, lng: myLongitude},
-                    radius: 0.1,
-                    strokeColor: "#345e82",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#345e82",
-                    fillOpacity: 0.4
-                });
-                myCity.setMap(map);
-                
-               
-            }
-        }, 1500);
-        
-     
+        if (ws.readyState === 1) {
+            msg = {'action': 'get_position'};
+
+            msg = JSON.stringify(msg);
+            ws.send(msg);
+            map.setCenter({lat: myLatitude, lng: myLongitude});
+
+            var myCity = new google.maps.Circle({
+                center: {lat: myLatitude, lng: myLongitude},
+                radius: 0.1,
+                strokeColor: "#345e82",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#345e82",
+                fillOpacity: 0.4
+            });
+            myCity.setMap(map);
+
+
+        }
+    }, 1500);
+
+
 
 
 
@@ -215,7 +215,7 @@ function getPosition(){}
         return "Bye now!";
     });
 //
- //remettre au centre de la carte a l'initialisatiion de la carte
+    //remettre au centre de la carte a l'initialisatiion de la carte
     setTimeout(function () {
         initMap();
         map.setCenter({lat: myLatitude, lng: myLongitude});
@@ -236,9 +236,9 @@ function getPosition(){}
         captureType = cbxCaptureType.val();
         comment = txtComment.val();
         //console.log(siteName,captureType,comment);
-        clearInterval(intervalGetPosition);
-        
-         new PNotify({
+        // clearInterval(intervalGetPosition);
+
+        new PNotify({
             title: 'Enregistrement des donnees en cours!',
             text: 'Debut de l\'enregistrement des donnees!',
             type: 'info',
@@ -247,30 +247,29 @@ function getPosition(){}
         $('#modal').modal('toggle');
         console.log(message);
         
-         persitInterval=setInterval(function(){
-            message = {'action': 'start_persiste', 'siteName': siteName, 'captureType': captureType, 'comment': comment};
-            message = JSON.stringify(message);
-            console.log(message);
-            ws.send(message);
-        },1200);
+        message = {'action': 'start_persiste', 'site_name': siteName, 'type': captureType, 'description': comment};
+        message = JSON.stringify(message);
+        console.log(message);
+        ws.send(message);
+
 
 
 
     });
     //stop capture
     btnStopCaptureModal.on('click', function () {
-           clearInterval(persitInterval);
-             new PNotify({
+        clearInterval(persitInterval);
+        new PNotify({
             title: 'Enregistrement',
             text: 'fin de l\'enregistrement des donnees.',
             type: 'info',
             styling: 'bootstrap3'
         });
-           intervalGetPosition =setInterval(function () {
-           
+        intervalGetPosition = setInterval(function () {
+
             if (ws.readyState === 1) {
                 msg = {'action': 'get_position'};
-                
+
                 msg = JSON.stringify(msg);
                 ws.send(msg);
                 map.setCenter({lat: myLatitude, lng: myLongitude});
@@ -285,8 +284,8 @@ function getPosition(){}
                     fillOpacity: 0.4
                 });
                 myCity.setMap(map);
-                
-               
+
+
             }
         }, 1500);
 

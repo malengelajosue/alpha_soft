@@ -12,8 +12,8 @@ def show(request,id):
 def map(request):
     return render(request, 'app/map.html',)
 def data(request,id):
-    coordonates=Coordonates.objects.get(site_number=id)
-    return render(request,'app/data.html')
+    coordonates=Coordonates.objects.filter(site_number=id)
+    return render(request,'app/data.html',{'coordonates':coordonates})
 def timeline(request):
     sites= Site.objects.all()
     return render(request,'app/timeline.html',{'sites':sites})
