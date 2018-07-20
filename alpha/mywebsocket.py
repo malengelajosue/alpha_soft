@@ -57,7 +57,7 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
                 moment = datetime.now().strftime('%H:%M:%S')
                 coordonnates = {'Lat': lat, 'Long': long, 'Alt': alt, 'Moment': moment,'Sat':satellite,'Course':course,'Speed':speed}
                 self.write_message(coordonnates)
-                time.sleep(0.5)
+                time.sleep(1)
     def getPosition(self):
         self.connected = False
         if self.connected == False:
@@ -65,6 +65,7 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
             self.myCoord = ''
             self.connected = True
 
+        time.sleep(0.5)
         coordonnates = self.gpsDevice.readCoordonates()
         self.myCoord = coordonnates
         if coordonnates != {}:
@@ -80,7 +81,10 @@ class MyAppWebSocket(tornado.websocket.WebSocketHandler):
             if self.persit==True:
                 self.saveCoordonates()
 
-            return coordonnates
+        else:
+            self.write_message({'status':0})
+
+        return coordonnates
 
 
 

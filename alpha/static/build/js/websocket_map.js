@@ -10,7 +10,9 @@ $(document).ready(function () {
     $('.ui-pnotify').remove();
     var map;
     var lat, long, alt, tm, speed, sat, course, marker, ws, infowindow;
-    var siteName, captureType, comment, btnCaptureModal, txtComment, cbxCaptureType, txtSiteName, btnStopCaptureModal, persitInterval, btnLaunchModal;
+    var siteName, captureType, comment, btnCaptureModal, txtComment, 
+    cbxCaptureType, txtSiteName, btnStopCaptureModal, 
+    persitInterval, btnLaunchModal,btnFullScreen;
     var myLongitude, myLatitude;
     //Enregisrement
     var messageToSendPersist, persistNow = false, stopPersistNow = false;
@@ -123,6 +125,7 @@ $(document).ready(function () {
             type: 'success',
             styling: 'bootstrap3'
         });
+        getData();
 
     };
     //on close a connexion
@@ -138,6 +141,7 @@ $(document).ready(function () {
     };
     //on receiving a message 
     ws.onmessage = function (evt) {
+
         var data = evt.data;
         console.log('message recu: ' + data);
         data = JSON.parse(data);
@@ -157,64 +161,84 @@ $(document).ready(function () {
         speed.html(data.Speed);
         sat.html(data.Sat);
         course.html(data.Course);
+        getData();
 
     };
     //fonctions
-
-
-    //recuperation des coordonnees a chaque seconde
-    var intervalGetPosition = setInterval(function () {
-
-        if (ws.readyState === 1) {
-            msg = {'action': 'get_position'};
-
-            msg = JSON.stringify(msg);
-            if (persistNow) {
-                ws.send(messageToSendPersist);
-                new PNotify({
-                    title: 'Debut de l\'enregistrement',
-                    text: 'Fin de l\'enregistrement des donnees.',
-                    type: 'info',
-                    styling: 'bootstrap3'
-                });
-                persistNow = false;
-            } else if (stopPersistNow) {
-                msgToStop = {'action': 'stop_persiste'};
-                msgToStop = JSON.stringify(msgToStop);
-                ws.send(msgToStop);
-                new PNotify({
-                    title: 'Fin de l\'enregistrement',
-                    text: 'Fin de l\'enregistrement des donnees.',
-                    type: 'default',
-                    styling: 'bootstrap3'
-                });
-                stopPersistNow = false;
-            } else {
-                ws.send(msg);
-            }
-
-            map.setCenter({lat: myLatitude, lng: myLongitude});
-
-            var myCity = new google.maps.Circle({
-                center: {lat: myLatitude, lng: myLongitude},
-                radius: 0.1,
-                strokeColor: "#345e82",
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: "#345e82",
-                fillOpacity: 0.4
-            });
-            myCity.setMap(map);
-
-
+   function toggleFullScreen(elem) {
+    // ## The below if statement seems to work better ## if ((document.fullScreenElement && document.fullScreenElement !== null) || (document.msfullscreenElement && document.msfullscreenElement !== null) || (!document.mozFullScreen && !document.webkitIsFullScreen)) {
+    if ((document.fullScreenElement !== undefined && document.fullScreenElement === null) || (document.msFullscreenElement !== undefined && document.msFullscreenElement === null) || (document.mozFullScreen !== undefined && !document.mozFullScreen) || (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen)) {
+        if (elem.requestFullScreen) {
+            elem.requestFullScreen();
+        } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullScreen) {
+            elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
         }
-    }, 1500);
+    } else {
+        if (document.cancelFullScreen) {
+            document.cancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+            document.webkitCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+}
+    function getData() {
 
-// A la fermeture de la page
-    $(window).on('beforeunload', function () {
-        return "Bye now!";
-    });
-//
+        msg = {'action': 'get_position'};
+        msg = JSON.stringify(msg);
+        if (persistNow) {
+            ws.send(messageToSendPersist);
+            setTimeout(function () {
+                ws.send(msg);
+            }, 500);
+            new PNotify({
+                title: 'Debut de l\'enregistrement',
+                text: 'Fin de l\'enregistrement des donnees.',
+                type: 'info',
+                styling: 'bootstrap3'
+            });
+            persistNow = false;
+        } else if (stopPersistNow) {
+            msgToStop = {'action': 'stop_persiste'};
+            msgToStop = JSON.stringify(msgToStop);
+            ws.send(msgToStop);
+            setTimeout(function () {
+                ws.send(msg);
+            }, 500);
+            new PNotify({
+                title: 'Fin de l\'enregistrement',
+                text: 'Fin de l\'enregistrement des donnees.',
+                type: 'dark',
+                styling: 'bootstrap3'
+            });
+            stopPersistNow = false;
+        } else {
+            ws.send(msg);
+        }
+
+        map.setCenter({lat: myLatitude, lng: myLongitude});
+
+        var myCity = new google.maps.Circle({
+            center: {lat: myLatitude, lng: myLongitude},
+            radius: 0.1,
+            strokeColor: "#345e82",
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: "#345e82",
+            fillOpacity: 0.4
+        });
+        myCity.setMap(map);
+
+    }
+
+
     //remettre au centre de la carte a l'initialisatiion de la carte
     setTimeout(function () {
         initMap();
@@ -229,17 +253,18 @@ $(document).ready(function () {
     btnCaptureModal = $('#btnCaptureModal');
     btnLaunchModal = $('#btnLaunchModal');
     btnStopCaptureModal = $('#btnStopCaptureModal');
+    btnFullScreen=$('#btnFullScreen');
     btnStopCaptureModal.hide();
     cbxCaptureType = $('#cbxCaptureType');
     txtSiteName = $('#txtSiteName');
     txtComment = $('#txtComment');
+    btnFullScreen.on('click',function(){
+        toggleFullScreen(document.body);
+    });
     btnCaptureModal.on('click', function () {
         siteName = txtSiteName.val();
         captureType = cbxCaptureType.val();
         comment = txtComment.val();
-        //console.log(siteName,captureType,comment);
-        // clearInterval(intervalGetPosition);
-
         $('#modal').modal('toggle');
 
 

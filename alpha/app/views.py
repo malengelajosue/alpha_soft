@@ -18,7 +18,7 @@ def data(request,id):
     coordonates=Coordonates.objects.filter(site_number=id)
     return render(request,'app/data.html',{'coordonates':coordonates})
 def timeline(request):
-    sites= Site.objects.all().order_by(Lower('id').desc())
+    sites= Site.objects.all().order_by(Lower('created_at').desc())
     return render(request,'app/timeline.html',{'sites':sites})
 def timeline_details(request,id):
     sites= Site.objects.get(site_number=id)

@@ -4261,3 +4261,11 @@ table thead .checkbox.radio { margin-top:-7px;margin-top:-21px; }
       
 }
 /** /bootstrap-datetimepicker **/
+
+
+*:fullscreen
+*:-ms-fullscreen,
+*:-webkit-full-screen,
+*:-moz-full-screen {
+   overflow: auto !important;
+}
